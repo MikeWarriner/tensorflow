@@ -71,7 +71,7 @@ fi
 echo "$SWIG_PATH" > tensorflow/tools/swig/swig_path
 
 # Invoke python_config and set up symlinks to python includes
-(./util/python/python_config.sh --setup "$PYTHON_BIN_PATH";) || exit -1
+#mfw#(./util/python/python_config.sh --setup "$PYTHON_BIN_PATH";) || exit -1
 
 # Run the gen_git_source to create links where bazel can track dependencies for
 # git hash propagation
@@ -149,6 +149,12 @@ while true; do
     CUDA_RT_LIB_PATH="lib64/libcudart.so${TF_CUDA_EXT}"
   elif [ "$OSNAME" == "Darwin" ]; then
     CUDA_RT_LIB_PATH="lib/libcudart${TF_CUDA_EXT}.dylib"
+  elif [ "$OSNAME" == "Windows" ]; then
+    CUDA_RT_LIB_PATH="lib/x64/cudart.lib"
+  elif [ "$OSNAME" == "MSYS_NT-10.0" ]; then
+    CUDA_RT_LIB_PATH="lib/x64/cudart.lib"
+  else
+    echo "INTERNAL ERROR : OS $OSNAME not known "
   fi
 
   if [ -e "${CUDA_TOOLKIT_PATH}/${CUDA_RT_LIB_PATH}" ]; then
@@ -211,6 +217,10 @@ while true; do
   elif [ "$OSNAME" == "Darwin" ]; then
     CUDA_DNN_LIB_PATH="lib/libcudnn${TF_CUDNN_EXT}.dylib"
     CUDA_DNN_LIB_ALT_PATH="libcudnn${TF_CUDNN_EXT}.dylib"
+  elif [ "$OSNAME" == "Windows" ]; then
+    CUDA_DNN_LIB_PATH="lib/cudnn.lib"
+  elif [ "$OSNAME" == "MSYS_NT-10.0" ]; then
+    CUDA_DNN_LIB_PATH="lib/cudnn.lib"
   fi
 
   if [ -e "$CUDNN_INSTALL_PATH/${CUDA_DNN_LIB_ALT_PATH}" -o -e "$CUDNN_INSTALL_PATH/${CUDA_DNN_LIB_PATH}" ]; then

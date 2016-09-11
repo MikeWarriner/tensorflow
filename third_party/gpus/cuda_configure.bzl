@@ -174,7 +174,11 @@ def _compute_capabilities(repository_ctx):
 
 def _cpu_value(repository_ctx):
   result = repository_ctx.execute(["uname", "-s"])
-  return result.stdout.strip()
+  a = result.stdout.strip()
+  if len(a)==0:
+     a = "Windows"
+  print("_cpu_value %s" % a)
+  return a
 
 
 def _cuda_symlink_files(cpu_value, cuda_version, cudnn_version):
@@ -187,6 +191,7 @@ def _cuda_symlink_files(cpu_value, cuda_version, cudnn_version):
   """
   cuda_ext = ".%s" % cuda_version if cuda_version else ""
   cudnn_ext = ".%s" % cudnn_version if cudnn_version else ""
+
   if cpu_value == "Linux":
     return struct(
         cuda_lib_path = "lib64",
@@ -209,7 +214,29 @@ def _cuda_symlink_files(cpu_value, cuda_version, cudnn_version):
         cuda_rand_lib = "lib/libcurand%s.dylib" % cuda_ext,
         cuda_fft_lib = "lib/libcufft%s.dylib" % cuda_ext,
         cuda_cupti_lib = "extras/CUPTI/lib/libcupti%s.dylib" % cuda_ext)
-  else:
+  elif cpu_value == "MSYS_NT-10.0":
+    return struct(
+        cuda_lib_path = "lib/x64",
+        cuda_rt_lib = "lib/x64/cudart.lib",
+        cuda_rt_lib_static = "lib/libcudart_static.lib",
+        cuda_blas_lib = "lib/libcublas%s.dll" % cuda_ext,
+        cuda_dnn_lib = "lib/x64/cudnn.lib",
+        cuda_dnn_lib_alt = "libcudnn%s.dll" % cudnn_ext,
+        cuda_rand_lib = "lib/libcurand%s.dll" % cuda_ext,
+        cuda_fft_lib = "lib/libcufft%s.dll" % cuda_ext,
+        cuda_cupti_lib = "extras/CUPTI/libx64/cupti.lib")
+  elif cpu_value == "Windows":
+    return struct(
+        cuda_lib_path = "lib",
+        cuda_rt_lib = "lib/libcudart%s.dll" % cuda_ext,
+        cuda_rt_lib_static = "lib/libcudart_static.lib",
+        cuda_blas_lib = "lib/libcublas%s.dll" % cuda_ext,
+        cuda_dnn_lib = "lib/libcudnn%s.dll" % cudnn_ext,
+        cuda_dnn_lib_alt = "libcudnn%s.dll" % cudnn_ext,
+        cuda_rand_lib = "lib/libcurand%s.dll" % cuda_ext,
+        cuda_fft_lib = "lib/libcufft%s.dll" % cuda_ext,
+        cuda_cupti_lib = "extras/CUPTI/libx64/cupti.lib")
+  else: #// MSYS_NT-10.0
     auto_configure_fail("Not supported CPU value %s" % cpu_value)
 
 
